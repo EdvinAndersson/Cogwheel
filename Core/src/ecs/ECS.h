@@ -13,8 +13,12 @@ namespace CW {
         public:
             ECS(bool build_scripts_dll);
 
-            void UpdateBaseComponents();
+            void AwakeComponents();
+            void StartComponents();
             void UpdateComponenets();
+            void DestroyComponents();
+
+            void UpdateBaseComponents();
             void OnEvent(Event event) override;
         private:
             bool build_scripts_dll;

@@ -10,7 +10,10 @@ namespace CW {
     PFNRegisterGeneratedComponents _RegisterGeneratedComponents;
     PFNAddGeneratedComponent _AddGeneratedComponent;
     PFNHasGeneratedComponent _HasGeneratedComponent;
-    PFNUpdateGeneratedComponents _UpdateGeneratedComponents;
+    PFNOnAwakeGeneratedComponents _OnAwakeGeneratedComponents;
+    PFNOnStartGeneratedComponents _OnStartGeneratedComponents;
+    PFNOnUpdateGeneratedComponents _OnUpdateGeneratedComponents;
+    PFNOnDestroyGeneratedComponents _OnDestroyGeneratedComponents;
     PFNRemoveGeneratedComponent _RemoveGeneratedComponent;
 
     HINSTANCE hDll;
@@ -66,8 +69,17 @@ namespace CW {
         _RegisterGeneratedComponents = (PFNRegisterGeneratedComponents) GetProcAddress(hDll, "RegisterGeneratedComponents");
         CW_ASSERT(_RegisterGeneratedComponents, "Unable to load function pointer!");
 
-        _UpdateGeneratedComponents = (PFNUpdateGeneratedComponents) GetProcAddress(hDll, "UpdateGeneratedComponents");
-        CW_ASSERT(_UpdateGeneratedComponents, "Unable to load function pointer!");
+        _OnAwakeGeneratedComponents = (PFNOnAwakeGeneratedComponents) GetProcAddress(hDll, "OnAwakeGeneratedComponents");
+        CW_ASSERT(_OnAwakeGeneratedComponents, "Unable to load function pointer!");
+
+        _OnStartGeneratedComponents = (PFNOnStartGeneratedComponents) GetProcAddress(hDll, "OnStartGeneratedComponents");
+        CW_ASSERT(_OnStartGeneratedComponents, "Unable to load function pointer!");
+
+        _OnUpdateGeneratedComponents = (PFNOnUpdateGeneratedComponents) GetProcAddress(hDll, "OnUpdateGeneratedComponents");
+        CW_ASSERT(_OnUpdateGeneratedComponents, "Unable to load function pointer!");
+
+        _OnDestroyGeneratedComponents = (PFNOnDestroyGeneratedComponents) GetProcAddress(hDll, "OnDestroyGeneratedComponents");
+        CW_ASSERT(_OnDestroyGeneratedComponents, "Unable to load function pointer!");
 
         _AddGeneratedComponent = (PFNAddGeneratedComponent) GetProcAddress(hDll, "AddGeneratedComponent");
         CW_ASSERT(_AddGeneratedComponent, "Unable to load function pointer!");
@@ -79,9 +91,19 @@ namespace CW {
         CW_ASSERT(_RemoveGeneratedComponent, "Unable to load function pointer!");
     }
 
-    void InitGeneratedComponentsUtility() { _InitGeneratedComponentsUtility(component_manager, entity_manager); }
+    void InitGeneratedComponentsUtility() {
+        DLLInitData data;
+        data.component_manager = component_manager;
+        data.entity_manager = entity_manager;
+        data.window = CW::WinGetWindowInstance();
+        
+        _InitGeneratedComponentsUtility(data); 
+    }
     void RegisterGeneratedComponents() { _RegisterGeneratedComponents(); }
-    void UpdateGeneratedComponents() { _UpdateGeneratedComponents(); }
+    void OnAwakeGeneratedComponents() { _OnAwakeGeneratedComponents(); }
+    void OnStartGeneratedComponents() { _OnStartGeneratedComponents(); }
+    void OnUpdateGeneratedComponents() { _OnUpdateGeneratedComponents(); }
+    void OnDestroyGeneratedComponents() { _OnDestroyGeneratedComponents(); }
     void AddGeneratedComponent(size_t type, GameObject& obj) { _AddGeneratedComponent(type, obj); }
     bool HasGeneratedComponent(size_t type, GameObject& obj) { return _HasGeneratedComponent(type, obj); }
     void RemoveGeneratedComponent(size_t type, GameObject& obj) {_RemoveGeneratedComponent(type, obj); }

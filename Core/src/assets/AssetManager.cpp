@@ -343,10 +343,10 @@ namespace CW {
         fprintf(file, "#pragma once\n\n");
         fprintf(file, "#include \"Core/src/ecs/GameObject.h\"\n");
         fprintf(file, "#include \"Core/src/ecs/Components.h\"\n\n");
+        fprintf(file, "#include \"Core/src/assets/ScriptManager.h\"\n\n");
         fprintf(file, "struct %s {\n", script_name);
         fprintf(file, "};\n\n");
-        fprintf(file, "extern CW::ComponentManager *_component_manager;\n");
-        fprintf(file, "extern CW::EntityManager *_entity_manager;\n");
+        fprintf(file, "extern CW::DLLInitData _init_data;\n");
         fprintf(file, "void %s_OnAwake(CW::GameObject game_object, %s& comp);\n", script_name, script_name);
         fprintf(file, "void %s_OnStart(CW::GameObject game_object, %s& comp);\n", script_name, script_name);
         fprintf(file, "void %s_OnUpdate(CW::GameObject game_object, %s& comp);\n", script_name, script_name);

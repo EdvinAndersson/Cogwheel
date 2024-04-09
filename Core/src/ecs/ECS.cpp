@@ -54,9 +54,19 @@ namespace CW {
             UpdateCameras(comp);
         }
     }
+
+    void ECS::AwakeComponents() {
+        CW::OnAwakeGeneratedComponents();
+    }
+    void ECS::StartComponents() {
+        CW::OnStartGeneratedComponents();
+    }
     void ECS::UpdateComponenets() {
         UpdateBaseComponents();
-        CW::UpdateGeneratedComponents();
+        CW::OnUpdateGeneratedComponents();
+    }
+    void ECS::DestroyComponents() {
+        CW::OnDestroyGeneratedComponents();
     }
     void ECS::OnEvent(Event event) {
         switch (event.event_type)
@@ -89,11 +99,13 @@ namespace CW {
                     }
 
                     fprintf(file_output, "CW::ComponentManager *_component_manager;\n");
-                    fprintf(file_output, "CW::EntityManager *_entity_manager;\n\n");
+                    fprintf(file_output, "CW::EntityManager *_entity_manager;\n");
+                    fprintf(file_output, "CW::DLLInitData _init_data;\n");
 
-                    fprintf(file_output, "void InitGeneratedComponentsUtility(CW::ComponentManager *component_manager, CW::EntityManager *entity_manager) {\n");
-                    fprintf(file_output, "    _component_manager = component_manager;\n");
-                    fprintf(file_output, "    _entity_manager = entity_manager;\n");
+                    fprintf(file_output, "void InitGeneratedComponentsUtility(CW::DLLInitData init_data) {\n");
+                    fprintf(file_output, "    _init_data = init_data;\n");
+                    fprintf(file_output, "    _component_manager = init_data.component_manager;\n");
+                    fprintf(file_output, "    _entity_manager = init_data.entity_manager;\n");
                     fprintf(file_output, "}\n");
 
                     fprintf(file_output, "void RegisterGeneratedComponents() {\n");
@@ -104,7 +116,35 @@ namespace CW {
                     }
                     fprintf(file_output, "}\n");
 
-                    fprintf(file_output, "void UpdateGeneratedComponents() {\n");
+                    fprintf(file_output, "void OnAwakeGeneratedComponents() {\n");
+                    for (auto& it : *loaded_scripts) {
+                        ScriptData *script_data = it.second;
+                        fprintf(file_output, "    {\n");
+                        fprintf(file_output, "        auto components = _component_manager->GetComponentArray<%s>();\n", script_data->name);
+                        fprintf(file_output, "        %s *c = components->GetComponentArrayData();\n", script_data->name);
+                        fprintf(file_output, "        int count = _component_manager->GetComponentArray<%s>()->GetComponentArraySize();\n", script_data->name);
+                        fprintf(file_output, "        for (int i = 0; i < count; i++) {\n");
+                        fprintf(file_output, "            %s_OnAwake(CW::GameObject { components->GetEntity(i) }, c[i]);\n", script_data->name);
+                        fprintf(file_output, "        }\n");
+                        fprintf(file_output, "    }\n");
+                    }
+                    fprintf(file_output, "}\n");
+
+                    fprintf(file_output, "void OnStartGeneratedComponents() {\n");
+                    for (auto& it : *loaded_scripts) {
+                        ScriptData *script_data = it.second;
+                        fprintf(file_output, "    {\n");
+                        fprintf(file_output, "        auto components = _component_manager->GetComponentArray<%s>();\n", script_data->name);
+                        fprintf(file_output, "        %s *c = components->GetComponentArrayData();\n", script_data->name);
+                        fprintf(file_output, "        int count = _component_manager->GetComponentArray<%s>()->GetComponentArraySize();\n", script_data->name);
+                        fprintf(file_output, "        for (int i = 0; i < count; i++) {\n");
+                        fprintf(file_output, "            %s_OnStart(CW::GameObject { components->GetEntity(i) }, c[i]);\n", script_data->name);
+                        fprintf(file_output, "        }\n");
+                        fprintf(file_output, "    }\n");
+                    }
+                    fprintf(file_output, "}\n");
+
+                    fprintf(file_output, "void OnUpdateGeneratedComponents() {\n");
                     for (auto& it : *loaded_scripts) {
                         ScriptData *script_data = it.second;
                         fprintf(file_output, "    {\n");
@@ -113,6 +153,20 @@ namespace CW {
                         fprintf(file_output, "        int count = _component_manager->GetComponentArray<%s>()->GetComponentArraySize();\n", script_data->name);
                         fprintf(file_output, "        for (int i = 0; i < count; i++) {\n");
                         fprintf(file_output, "            %s_OnUpdate(CW::GameObject { components->GetEntity(i) }, c[i]);\n", script_data->name);
+                        fprintf(file_output, "        }\n");
+                        fprintf(file_output, "    }\n");
+                    }
+                    fprintf(file_output, "}\n");
+
+                    fprintf(file_output, "void OnDestroyGeneratedComponents() {\n");
+                    for (auto& it : *loaded_scripts) {
+                        ScriptData *script_data = it.second;
+                        fprintf(file_output, "    {\n");
+                        fprintf(file_output, "        auto components = _component_manager->GetComponentArray<%s>();\n", script_data->name);
+                        fprintf(file_output, "        %s *c = components->GetComponentArrayData();\n", script_data->name);
+                        fprintf(file_output, "        int count = _component_manager->GetComponentArray<%s>()->GetComponentArraySize();\n", script_data->name);
+                        fprintf(file_output, "        for (int i = 0; i < count; i++) {\n");
+                        fprintf(file_output, "            %s_OnDestroy(CW::GameObject { components->GetEntity(i) }, c[i]);\n", script_data->name);
                         fprintf(file_output, "        }\n");
                         fprintf(file_output, "    }\n");
                     }

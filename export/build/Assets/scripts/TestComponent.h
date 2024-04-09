@@ -2,13 +2,12 @@
 
 #include "Core/src/ecs/GameObject.h"
 #include "Core/src/ecs/Components.h"
-#include "Editor/src/Console.h"
+#include "Core/src/assets/ScriptManager.h"
 
 struct TestComponent {
 };
 
-extern CW::ComponentManager *_component_manager;
-extern CW::EntityManager *_entity_manager;
+extern CW::DLLInitData _init_data;
 
 void TestComponent_OnAwake(CW::GameObject game_object, TestComponent& comp);
 void TestComponent_OnStart(CW::GameObject game_object, TestComponent& comp);
