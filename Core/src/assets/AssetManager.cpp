@@ -320,15 +320,18 @@ namespace CW {
 
         model->mesh_index = hashed_path;
     }
-    void AssetManager::CreateScript(char *path, char *script_name) {
-        size_t hashed_path = HashString(path);
+    void AssetManager::CreateAndLoadScript(char *path, char *script_name) {
+        char local_path[1024] = {};
+        strcpy(local_path, path);
+        strcat(local_path, script_name);
+        strcat(local_path, ".h");
+        size_t hashed_path = HashString(local_path);
 
         if (loaded_scripts.find(hashed_path) != loaded_scripts.end()){
-            printf("Script already exist with that name! %s\n", path);
+            printf("Script already exist with that name! %s\n", local_path);
             return;
         }
         char full_path[1024] = {};
-
         strcpy(full_path, assets_path);
         strcat(full_path, "/");
         strcat(full_path, path);
@@ -370,6 +373,8 @@ namespace CW {
         fprintf(file, "void %s_OnUpdate(CW::GameObject game_object, %s& comp) {\n}\n", script_name, script_name);
         fprintf(file, "void %s_OnDestroy(CW::GameObject game_object, %s& comp) {\n}\n", script_name, script_name);
         fclose(file);
+
+        LoadScript(local_path);
     }
     void AssetManager::LoadScript(char *path) {
         size_t hashed_path = HashString(path);
@@ -387,9 +392,27 @@ namespace CW {
         else
             strncpy(script_data->name, path, strlen(path)-2); //remove .h
     
-        printf("name: %s\n", script_data->name);
-
         loaded_scripts.insert({ hashed_path, script_data });
+    }
+
+    void AssetManager::DeleteScript(ScriptIndex script_index) {
+        ScriptData *script_data = loaded_scripts[script_index];
+        loaded_scripts.erase(script_index);
+        
+        //Header file
+        char full_path[1024] = {};
+        strcpy(full_path, assets_path);
+        strcat(full_path, "/");
+        strcat(full_path, script_data->asset_path);
+        DeleteFileA(full_path);
+
+        //Source file
+        char full_path_source[1024] = {};
+        strncpy(full_path_source, full_path, strlen(full_path)-2);
+        strcat(full_path_source, ".cpp");
+        DeleteFileA(full_path_source);
+
+        delete script_data;
     }
 
     void AssetManager::GetAllAssetPaths(DIR *dir, char file_paths[MAX_ASSETS][256], unsigned int *count, char base_dir[256]) {

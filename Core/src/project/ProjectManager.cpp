@@ -12,6 +12,11 @@ namespace CW {
 
     #define PROJECT_FILE_SIZE 1024*1024
 
+    void ProjectManager::Init() {
+        EventListen(EventType::PLAY_MODE_START);
+        EventListen(EventType::PLAY_MODE_STOP);
+    }
+
     Project* ProjectManager::CreateProject(char *project_folder_path, ProjectSpecification spec) {
         Project *project = new Project();
         project->specification = spec;
@@ -70,7 +75,6 @@ namespace CW {
         project_specification.resolution_mode = (CW::ResolutionMode) deserialized.GetInt();
         project_specification.vsync = deserialized.GetInt();
         project_specification.windowed_size = vec2s { (float) deserialized.GetInt(), (float) deserialized.GetInt() };
-        int scene_count = deserialized.GetInt();
 
         // Get the project folder path
         char *last_occurrence_of_slash = strrchr(project_file_path, '/');
@@ -87,7 +91,55 @@ namespace CW {
 
         EventData_PROJECT_LOAD_LATE e2 = { current_project };
         EventManager::InvokeEvent(PROJECT_LOAD_LATE, &e2);
+    
+        LoadScenesFromData(deserialized);
 
+        delete data;
+    }
+    void ProjectManager::LoadProject(Project *project) {
+        if (current_project != 0)
+            CloseProject(current_project);
+
+        current_project = project;
+
+        EventData_PROJECT_LOAD e = { current_project };
+        EventManager::InvokeEvent(PROJECT_LOAD, &e);
+    }
+    void ProjectManager::ReloadProject() {
+        CW_ASSERT(current_project, "Currently no loaded project");
+
+        char full_path[1024] = {};
+        strcpy(full_path, current_project->project_folder_path);
+        strcat(full_path, "/");
+        strcat(full_path, current_project->specification.project_name);
+        strcat(full_path, ".proj");
+
+        FILE *file = fopen(full_path, "r");
+        CW_ASSERT(file, "Falied to load project: %s\n", project_file_path);
+
+        printf("Reloading project... %s\n", full_path);
+
+        //Get project file size
+        fseek(file, 0, SEEK_END);
+        long project_file_size = ftell(file);
+        fseek(file, 0, 0);
+
+        char *data = (char *) calloc(project_file_size, 1);
+        fread(data, 1, project_file_size, file);
+        
+        Deserialize deserialized(data, ';');
+
+        deserialized.GetString(); //Project name
+        deserialized.GetInt(); //Resolution mode
+        deserialized.GetInt(); //Vsync
+        deserialized.GetInt(); deserialized.GetInt(); //Windowed size
+
+        EventManager::InvokeEvent(PROJECT_RELOAD, 0);
+
+        LoadScenesFromData(deserialized);
+    }
+    void ProjectManager::LoadScenesFromData(Deserialize deserialized) {
+        int scene_count = deserialized.GetInt();
         for (unsigned int i = 0; i < scene_count; i++) {
             scene_manager->CreateNewScene(current_project, deserialized.GetString());
 
@@ -118,6 +170,9 @@ namespace CW {
                     for (int m = 0; m < mesh_renderer.material_count; m++)
                         mesh_renderer.materials[m] = deserialized.GetSize_t();
                 }
+                if (signature.test(2)) {
+                    CW::Light& camera = obj.AddComponent<CW::Light>();
+                }
                 if (signature.test(3)) {
                     CW::Camera& camera = obj.AddComponent<CW::Camera>();
                     camera.fov = deserialized.GetFloat();
@@ -131,19 +186,9 @@ namespace CW {
                 }
             }
         }
-        delete data;
-    }
-    void ProjectManager::LoadProject(Project *project) {
-        if (current_project != 0)
-            CloseProject(current_project);
-
-        current_project = project;
-
-        EventData_PROJECT_LOAD e = { current_project };
-        EventManager::InvokeEvent(PROJECT_LOAD, &e);
     }
     void ProjectManager::SaveProject() {
-        char full_path[1024] = {0};
+        char full_path[1024] = {};
         strcpy(full_path, current_project->project_folder_path);
         strcat(full_path, "/");
         strcat(full_path, current_project->specification.project_name);
@@ -214,5 +259,18 @@ namespace CW {
 
     void ProjectManager::CloseProject(Project *project) {
         delete project;
+    }
+
+    void ProjectManager::OnEvent(Event event) {
+        switch (event.event_type) {
+            case EventType::PLAY_MODE_START: {
+                printf("PLAY_MODE_START\n");
+                SaveProject();
+            } break;
+            case EventType::PLAY_MODE_STOP: {
+                printf("PLAY_MODE_STOP\n");
+                ReloadProject();
+            } break;
+        }
     }
 }

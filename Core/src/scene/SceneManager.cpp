@@ -5,9 +5,11 @@ namespace CW {
 
     SceneManager::SceneManager() 
         : current_scene_id(0) {
+            
         EventListen(EventType::ECS_INSTANTIATE_GAMEOBJECT);
         EventListen(EventType::ECS_DESTROY_GAMEOBJECT);
         EventListen(EventType::PROJECT_LOAD);
+        EventListen(EventType::PROJECT_RELOAD);
     }
 
     void SceneManager::CreateNewScene(char* name) {
@@ -16,7 +18,7 @@ namespace CW {
         CreateNewScene(current_project, name);
     }
     void SceneManager::CreateNewScene(Project *project, char* name) {
-        CW_ASSERT(project->scene_count < MAX_SCENES, "");
+        CW_ASSERT(project->scene_count < MAX_SCENES, "No active project!");
 
         Scene scene;
         strcpy(scene.name, name);
@@ -25,7 +27,7 @@ namespace CW {
     }
 
     void SceneManager::SetActiveScene(char* scene_name) {
-        CW_ASSERT(current_project != 0, "");
+        CW_ASSERT(current_project != 0, "No active project!");
 
         for (unsigned int i = 0; i < current_project->scene_count; i++) {
             if (strcmp(current_project->scenes[i].name, scene_name) == 0) {
@@ -37,9 +39,24 @@ namespace CW {
         CW_ASSERT(false, "");
     }
 
+    void SceneManager::ClearScenes() {
+        CW_ASSERT(current_project != 0, "No active project!");
+
+        for (int i = 0; i < current_project->scene_count; i++) {
+            current_project->scenes[i] = {};
+        }
+
+        current_project->scene_count = 0;
+        current_scene_id = 0;
+    }
+
     void SceneManager::OnEvent(Event event) {
         switch (event.event_type)
         {
+            case EventType::PROJECT_RELOAD:
+            {
+                ClearScenes();
+            } break;
             case EventType::PROJECT_LOAD:
             {
                 EventData_PROJECT_LOAD *e = (EventData_PROJECT_LOAD *) event.data;

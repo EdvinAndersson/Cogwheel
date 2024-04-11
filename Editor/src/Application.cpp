@@ -68,30 +68,25 @@ namespace CWEditor {
     void Application::OnEvent(CW::Event event) {
         switch (event.event_type)
         {
-            case CW::WINDOW_CLOSE:
-            {
+            case CW::WINDOW_CLOSE: {
                 cogwheel->Stop();
             } break;
-            case CW::WINDOW_RESIZE:
-            {
+            case CW::WINDOW_RESIZE: {
             } break;
-            case CW::WINDOW_KEYDOWN:
-            {
+            case CW::WINDOW_KEYDOWN: {
                 CW::EventData_WINDOW_KEYDOWN* e = (CW::EventData_WINDOW_KEYDOWN*) event.data;
                 if (e->keycode == CW::KeyCode::ESCAPE) {
                     cogwheel->Stop();
                     window->Destroy();
                 }
             } break;
-            case CW::WINDOW_KEYPRESSED:
-            {
+            case CW::WINDOW_KEYPRESSED: {
                 CW::EventData_WINDOW_KEYPRESSED* e = (CW::EventData_WINDOW_KEYPRESSED*) event.data;
                 if (e->keycode == CW::KeyCode::F11) {
                     window->WinSetFullscreen(!window->IsFullscreen());
                 }
             } break;
-            case CW::PROJECT_LOAD:
-            {
+            case CW::PROJECT_LOAD: {
                 CW::EventData_PROJECT_LOAD* e = (CW::EventData_PROJECT_LOAD*) event.data;
                 window->WinSetTitle(e->project->specification.project_name);
             } break;

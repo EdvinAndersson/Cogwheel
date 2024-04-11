@@ -7,16 +7,20 @@
 
 namespace CW {
 
-    class ProjectManager {
+    class ProjectManager : IEventListener {
         public:
+            void Init();
             Project* CreateProject(char *projects_folder_path, ProjectSpecification spec);
             void LoadProject(char *project_file_path);
             void LoadProject(Project *project);
+            void ReloadProject();
             void SaveProject();
             void CloseProject(Project *project);
 
+            void LoadScenesFromData(Deserialize deserialized);
             inline Project* GetCurrentProject() { return current_project; }
             inline void SetSceneManager(SceneManager *_scene_manager) { scene_manager = _scene_manager; }
+            void OnEvent(Event event) override;
         private:
             Project *current_project;
             SceneManager *scene_manager;

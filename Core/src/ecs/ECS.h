@@ -15,11 +15,13 @@ namespace CW {
 
             void AwakeComponents();
             void StartComponents();
-            void UpdateComponenets();
+            void UpdateComponenets(bool with_generated = true);
             void DestroyComponents();
 
             void UpdateBaseComponents();
             void OnEvent(Event event) override;
+            void ReloadScripts(bool compile_scripts = false);
+            void CompileScripts();
         private:
             bool build_scripts_dll;
     };

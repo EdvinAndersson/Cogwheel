@@ -15,6 +15,7 @@ namespace CW {
             void CreateNewScene(char* name);
             void CreateNewScene(Project *project, char* name);
             void SetActiveScene(char* name);
+            void ClearScenes();
 
             Scene& GetActiveScene();
             Scene* GetScenes();

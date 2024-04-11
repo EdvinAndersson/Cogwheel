@@ -16,9 +16,14 @@ namespace CW {
         PROJECT_LOAD,
         PROJECT_CREATE,
         PROJECT_LOAD_LATE,
+        PROJECT_RELOAD,
 
         ECS_INSTANTIATE_GAMEOBJECT,
-        ECS_DESTROY_GAMEOBJECT
+        ECS_DESTROY_GAMEOBJECT,
+
+        PLAY_MODE_START,
+        PLAY_MODE_STOP,
+        PLAY_MODE_PAUSE
     };
 
     struct Event {
@@ -34,6 +39,8 @@ namespace CW {
     };
     struct EventData_PROJECT_LOAD_LATE{
         Project *project;
+    };
+    struct EventData_PROJECT_RELOAD {
     };
     struct EventData_WINDOW_RESIZE {
         int width, height;
@@ -54,5 +61,11 @@ namespace CW {
     };
     struct EventData_ECS_DESTROY_GAMEOBJECT {
         GameObject game_object;
+    };
+    struct EventData_PLAY_MODE_START {
+    };
+    struct EventData_PLAY_MODE_STOP {
+    };
+    struct EventData_PLAY_MODE_PAUSE {
     };
 }

@@ -1,8 +1,10 @@
 #include "PlayerMovement.h"
 
 void PlayerMovement_OnAwake(CW::GameObject game_object, PlayerMovement& comp) {
+    printf("PlayerMovement_OnAwake");
 }
 void PlayerMovement_OnStart(CW::GameObject game_object, PlayerMovement& comp) {
+    printf("PlayerMovement_OnStart");
 }
 void PlayerMovement_OnUpdate(CW::GameObject game_object, PlayerMovement& comp) {
     CW::Transform& transform = game_object.GetComponent<CW::Transform>(_init_data.component_manager);

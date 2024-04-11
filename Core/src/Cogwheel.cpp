@@ -24,7 +24,9 @@ namespace CW {
 
         asset_manager = new AssetManager();
         ecs = new ECS(build_scripts_dll);
+        
         project_manager = new ProjectManager();
+        project_manager->Init();
 
         scene_manager = new SceneManager();
         project_manager->SetSceneManager(scene_manager);

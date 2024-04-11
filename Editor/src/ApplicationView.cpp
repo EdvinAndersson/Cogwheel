@@ -30,6 +30,8 @@ namespace CWEditor {
         EventListen(CW::EventType::WINDOW_RESIZE);
         EventListen(CW::EventType::PROJECT_LOAD);
         EventListen(CW::EventType::PROJECT_LOAD_LATE);
+        EventListen(CW::EventType::PLAY_MODE_START);
+        EventListen(CW::EventType::PLAY_MODE_STOP);
 
         glDisable(GL_FRAMEBUFFER_SRGB);
 
@@ -277,7 +279,17 @@ namespace CWEditor {
     }
 
     void ApplicationView::RenderScene() {
-        cogwheel->GetECS()->UpdateComponenets();
+        switch (play_mode) {
+            case PlayMode::RUNNING: {
+                cogwheel->GetECS()->UpdateComponenets();
+            } break;
+            case PlayMode::NOT_RUNNING: {
+                cogwheel->GetECS()->UpdateComponenets(false);
+            } break;
+            case PlayMode::RUNNING_PAUSED: {
+                cogwheel->GetECS()->UpdateComponenets(false);
+            } break;
+        }
     }
     void ApplicationView::OnEvent(CW::Event e) {
         switch (e.event_type) {
@@ -301,6 +313,12 @@ namespace CWEditor {
             case CW::EventType::PROJECT_LOAD_LATE: {
                 assets_builder->Refresh();
                 current_asset_folder_hash = CW::HashString("");
+            } break;
+            case CW::PLAY_MODE_START: {
+                play_mode = PlayMode::RUNNING;
+            } break;
+            case CW::PLAY_MODE_STOP: {
+                play_mode = PlayMode::NOT_RUNNING;
             } break;
         }
     }
@@ -337,7 +355,7 @@ namespace CWEditor {
             ImGuiStyle& style = ImGui::GetStyle();
             float width = 0.0f;
             width += ImGui::CalcTextSize("Play").x;
-            width += ImGui::CalcTextSize("Pause!").x;
+            width += ImGui::CalcTextSize("Stop").x;
             width += style.ItemSpacing.x;
 
             float off = (ImGui::GetContentRegionAvail().x - width) * 0.5f;
@@ -345,9 +363,13 @@ namespace CWEditor {
 
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3);
             if (ImGui::Button("Play")) {
+                CW::EventData_PLAY_MODE_START e = {};
+                CW::EventManager::InvokeEvent_(CW::EventType::PLAY_MODE_START, &e, sizeof(CW::EventData_PLAY_MODE_START));
             }
             ImGui::SameLine();
             if (ImGui::Button("Pause")) {
+                CW::EventData_PLAY_MODE_STOP e = {};
+                CW::EventManager::InvokeEvent_(CW::EventType::PLAY_MODE_STOP, &e, sizeof(CW::EventData_PLAY_MODE_STOP));
             }
             ImGui::PopStyleVar();
         }
@@ -443,7 +465,17 @@ namespace CWEditor {
         static char* asset_path = "";
 
         if (ImGui::Button("Refresh")) {
+            CW::AssetManager::Get()->UnloadAssets();
+            CW::AssetManager::Get()->LoadBuiltInAssets();
+            CW::AssetManager::Get()->LoadAssets();
             assets_builder->Refresh();
+            current_asset_folder_hash = CW::HashString("");
+            asset_path = "";
+            selected_asset.asset_index = 0;
+        }
+        if (ImGui::Button("Recompile Scripts")) {
+            //cogwheel->GetECS()->CompileScripts();
+            //CW::EventManager::InvokeEvent_(CW::EventType::PROJECT_RELOAD, 0, 0);
         }
         ImGui::SameLine();
         if (ImGui::Button("Back")) {
@@ -669,15 +701,31 @@ namespace CWEditor {
 
         if (ImGui::BeginPopupContextItem("Asset Creation", flags)) { 
             if (!selected_asset_info) {
-                if (ImGui::Button("New Script")) {
-                    CW::AssetManager::Get()->CreateScript("scripts/", "PlayerMovement");
+                if (ImGui::BeginPopupContextItem("New_Script_Popup")){
+                    static char buf1[48] = ""; 
 
-                    ImGui::CloseCurrentPopup();
+                    ImGui::Text("Script name: ");
+
+                    ImGui::PushItemWidth(-FLT_EPSILON);
+                    ImGui::InputText("Script", buf1, 32);
+                    ImGui::PopItemWidth();
+
+                    if(window->GetInputState(CW::KeyCode::RETURN)){
+                        CW::AssetManager::Get()->CreateAndLoadScript("scripts/", buf1);
+                        
+                        strcpy(buf1, "");
+                        asset_update = true;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup(); 
                 }
+                if (ImGui::Button("New Script"))
+                    ImGui::OpenPopup("New_Script_Popup");
+
                 if (ImGui::BeginPopupContextItem("New_Material_Popup")){
                     static char buf1[48] = ""; 
 
-                    ImGui::Text("Material Name: ");
+                    ImGui::Text("Material name: ");
 
                     ImGui::PushItemWidth(-FLT_EPSILON);
                     ImGui::InputText("Material", buf1, 32);
@@ -692,6 +740,7 @@ namespace CWEditor {
                         strcat(buf1, ".mat");
                         CW::AssetManager::Get()->CreateAndLoadMaterialAsset(buf1, mat);
 
+                        strcpy(buf1, "");
                         asset_update = true;
                         ImGui::CloseCurrentPopup();
                     }
@@ -710,6 +759,9 @@ namespace CWEditor {
                     {
                         case AssetType::MATERIAL: {
                             CW::AssetManager::Get()->DeleteMaterial(selected_asset_info->asset_index);
+                        } break;
+                        case AssetType::SCRIPT: {
+                            CW::AssetManager::Get()->DeleteScript(selected_asset_info->asset_index);
                         } break;
                     }
                 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/src/event/IEventListener.h"
+#include "Core/src/event/EventManager.h"
 #include "Core/src/Cogwheel.h"
 #include "Core/src/Rendering/Renderer3D.h"
 #include "Core/src/Rendering/Framebuffer.h"
@@ -22,6 +23,12 @@
 #include <shobjidl.h>
 
 namespace CWEditor {
+
+    enum PlayMode {
+        NOT_RUNNING,
+        RUNNING,
+        RUNNING_PAUSED
+    };
 
     class ApplicationView : CW::IEventListener {
         public:
@@ -50,6 +57,8 @@ namespace CWEditor {
             CW::Cogwheel *cogwheel;
             CW::Window *window;
             Console *console;
+
+            PlayMode play_mode = PlayMode::NOT_RUNNING;
 
             CW::GameObject selected_game_object = CW::GameObject {};
             AssetInfo selected_asset = {};
