@@ -29,7 +29,7 @@ namespace CWEditor {
 
         CW::R3D_Init(window);
         
-        #if 1
+        #if 0
         { //Create project
             CW::ProjectSpecification spec;
             strcpy(spec.project_name, "Unnamed Project");
@@ -40,10 +40,22 @@ namespace CWEditor {
             CW::Project *project = cogwheel->GetProjectManager()->CreateProject("Editor/res/projects/Project1", spec);
             cogwheel->GetProjectManager()->LoadProject(project);
             cogwheel->GetSceneManager()->CreateNewScene("Basic Scene");
+
+            CW::GameObject camera = CW::GameObject::Instantiate(vec3s {0, 4, 0 });
+            CW::Camera& c = camera.AddComponent<CW::Camera>();
+            c.is_main = true;
+            strcpy(camera.GetComponent<CW::Transform>().name, "Camera");
+
+            CW::GameObject obj = CW::GameObject::Instantiate(vec3s {0, -4, 0 });
+            obj.GetComponent<CW::Transform>().scale = vec3s {40, 1, 40};
+            CW::MeshRenderer& mesh_renderer = obj.AddComponent<CW::MeshRenderer>();
+            mesh_renderer.mesh = CW::AssetManager::Get()->GetDefaultMeshIndex();
+            mesh_renderer.materials[0] = CW::AssetManager::Get()->GetDefaultMaterialIndex();
+            mesh_renderer.material_count++;
         }
         #endif
 
-        //cogwheel->GetProjectManager()->LoadProject("Editor/res/projects/Project1/Unnamed Project.proj");
+        cogwheel->GetProjectManager()->LoadProject("Editor/res/projects/Project1/Unnamed Project.proj");
         
         EventListen(CW::WINDOW_CLOSE);
         EventListen(CW::WINDOW_RESIZE);

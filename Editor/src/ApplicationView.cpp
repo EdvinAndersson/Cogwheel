@@ -53,18 +53,6 @@ namespace CWEditor {
             CW::AssetManager::Get()->GetTextureIndex("images/skybox/bottom.jpg"),
             CW::AssetManager::Get()->GetTextureIndex("images/skybox/front.jpg"),
             CW::AssetManager::Get()->GetTextureIndex("images/skybox/back.jpg"));
-        
-        CW::GameObject camera = CW::GameObject::Instantiate(vec3s {0, 4, 0 });
-        CW::Camera& c = camera.AddComponent<CW::Camera>();
-        c.is_main = true;
-        strcpy(camera.GetComponent<CW::Transform>().name, "Camera");
-
-        CW::GameObject obj = CW::GameObject::Instantiate(vec3s {0, -4, 0 });
-        obj.GetComponent<CW::Transform>().scale = vec3s {40, 1, 40};
-        CW::MeshRenderer& mesh_renderer = obj.AddComponent<CW::MeshRenderer>();
-        mesh_renderer.mesh = CW::AssetManager::Get()->GetDefaultMeshIndex();
-        mesh_renderer.materials[0] = CW::AssetManager::Get()->GetDefaultMaterialIndex();
-        mesh_renderer.material_count++;
     }
     void ApplicationView::Update() {
         double time = window->GetTime();
@@ -474,8 +462,9 @@ namespace CWEditor {
             selected_asset.asset_index = 0;
         }
         if (ImGui::Button("Recompile Scripts")) {
-            //cogwheel->GetECS()->CompileScripts();
-            //CW::EventManager::InvokeEvent_(CW::EventType::PROJECT_RELOAD, 0, 0);
+            cogwheel->GetECS()->LoadScripts(true);
+
+            cogwheel->GetProjectManager()->ReloadProject();
         }
         ImGui::SameLine();
         if (ImGui::Button("Back")) {

@@ -76,15 +76,15 @@ namespace CW {
         {
             case EventType::PROJECT_RELOAD:
             {
-                ReloadScripts();
+                LoadScripts();
             } break;
             case EventType::PROJECT_LOAD:
             {
-                ReloadScripts(true);
+                LoadScripts(true);
             } break;
         }
     }
-    void ECS::ReloadScripts(bool compile_scripts) {
+    void ECS::LoadScripts(bool compile_scripts) {
         component_manager->ResetComponentArrays();
         entity_manager->ResetEntities();
 
@@ -94,10 +94,26 @@ namespace CW {
         component_manager->RegisterComponent<Camera>();
 
         FreeDLL();
-        if (compile_scripts) 
+        if (compile_scripts)
             CompileScripts();
         LoadDLLFunctions();
         
+        CW::InitGeneratedComponentsUtility();
+        CW::RegisterGeneratedComponents();
+    }
+    void ECS::ComplieAndRegisterScripts() {
+        FreeDLL();
+        CompileScripts();
+        LoadDLLFunctions();
+
+        component_manager->ResetComponentArrays();
+        entity_manager->ResetEntities();
+
+        component_manager->RegisterComponent<Transform>();
+        component_manager->RegisterComponent<MeshRenderer>();
+        component_manager->RegisterComponent<Light>();
+        component_manager->RegisterComponent<Camera>();
+
         CW::InitGeneratedComponentsUtility();
         CW::RegisterGeneratedComponents();
     }

@@ -20,8 +20,9 @@ namespace CW {
 
             void UpdateBaseComponents();
             void OnEvent(Event event) override;
-            void ReloadScripts(bool compile_scripts = false);
+            void LoadScripts(bool compile_scripts = false);
             void CompileScripts();
+            void ComplieAndRegisterScripts();
         private:
             bool build_scripts_dll;
     };
