@@ -350,12 +350,13 @@ namespace CWEditor {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
 
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3);
-            if (ImGui::Button("Play")) {
+            if (ImGui::Button("Play") && play_mode == PlayMode::NOT_RUNNING) {
                 CW::EventData_PLAY_MODE_START e = {};
                 CW::EventManager::InvokeEvent_(CW::EventType::PLAY_MODE_START, &e, sizeof(CW::EventData_PLAY_MODE_START));
             }
             ImGui::SameLine();
-            if (ImGui::Button("Pause")) {
+            if (ImGui::Button("Stop") && play_mode == PlayMode::RUNNING) {
+                selected_game_object.entity = 0;
                 CW::EventData_PLAY_MODE_STOP e = {};
                 CW::EventManager::InvokeEvent_(CW::EventType::PLAY_MODE_STOP, &e, sizeof(CW::EventData_PLAY_MODE_STOP));
             }

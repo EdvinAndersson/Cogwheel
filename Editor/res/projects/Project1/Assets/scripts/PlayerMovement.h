@@ -4,6 +4,8 @@
 #include "Core/src/ecs/Components.h"
 #include "Core/src/assets/ScriptManager.h"
 
+#include "Physics.h"
+
 struct PlayerMovement {
 };
 
