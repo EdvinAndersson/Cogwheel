@@ -85,7 +85,7 @@ namespace CWEditor {
 
                 AssetInfo *asset_info = new AssetInfo();
                 asset_info->asset_type = AssetType::FOLDER;
-                asset_info->icon = CW::AssetManager::Get()->GetTextureIndex("images/folder_icon.png");
+                asset_info->icon = CW::AssetManager::Get()->GetTextureIndex("built_in/folder_icon.png");
                 strncpy(asset_info->path, next_base_dir, strlen(next_base_dir) - 1);
                 strcpy(asset_info->name, asset_info->path);
                 
