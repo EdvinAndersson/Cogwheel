@@ -17,7 +17,7 @@ namespace CWEditor {
             log_entry_count = 0;
         }
         ImGui::SameLine();
-        const char* items[] = { "Normal", "Warning", "Error" };
+        const char* items[] = { "Normal", "Warning", "Error", "INFO" };
         ImGui::PushItemWidth(-FLT_EPSILON);
         ImGui::Combo("Log Level", &active_log_level, items, IM_ARRAYSIZE(items));
         ImGui::PopItemWidth();
@@ -45,6 +45,10 @@ namespace CWEditor {
                     case LogLevel::LOG_ERROR: {
                         color = ImVec4(1.0f, 0.2f, 0.1f, 1.0f);
                         log_info = "[ERROR]";
+                    } break;
+                    case LogLevel::LOG_INFO: {
+                        color = ImVec4(0.1f, 1.0f, 0.1f, 1.0f);
+                        log_info = "[INFO]";
                     } break;
                 }
 

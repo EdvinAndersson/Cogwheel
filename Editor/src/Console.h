@@ -7,7 +7,8 @@ namespace CWEditor {
     enum LogLevel {
         LOG_NORMAL,
         LOG_WARNING,
-        LOG_ERROR
+        LOG_ERROR,
+        LOG_INFO
     };
 
     struct LogEntry {

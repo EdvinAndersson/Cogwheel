@@ -435,7 +435,6 @@ namespace CWEditor {
                 if (UIAssetInput(AssetType::TEXTURE, "Specular", &material->specular_map)) updated = true;
 
                 if (updated) {
-                    Console::Log("Updated!");
                     CW::AssetManager::Get()->CreateAndLoadMaterialAsset(material->asset_path, *material);
                 }
             } break;
@@ -466,6 +465,8 @@ namespace CWEditor {
             cogwheel->GetECS()->LoadScripts(true);
 
             cogwheel->GetProjectManager()->ReloadProject();
+
+            Console::Log(LogLevel::LOG_INFO, "Finished recompiling scripts!");
         }
         ImGui::SameLine();
         if (ImGui::Button("Back")) {
