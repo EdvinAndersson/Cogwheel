@@ -39,6 +39,7 @@ namespace CW {
             if (camera.is_main) {
                 CW::g_main_camera->pos = transform.position;
                 CW::g_main_camera->pos.x = -CW::g_main_camera->pos.x;
+                CW::g_main_camera->pos.z = -CW::g_main_camera->pos.z;
                 CW::g_main_camera->rotation = transform.rotation;
                 CW::g_main_camera->fov = camera.fov;
             }
