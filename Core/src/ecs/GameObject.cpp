@@ -19,6 +19,20 @@ namespace CW {
 
         return gameObject;
     }
+    GameObject GameObject::Instantiate(ComponentManager *component_manager, EntityManager *entity_manager, vec3s position) {
+        Entity entity = entity_manager->CreateEntity();
+        GameObject gameObject {};
+        gameObject.entity = entity;
+        Transform& transform = gameObject.AddComponent<Transform>(component_manager, entity_manager);
+        transform.position = position;
+        transform.scale = vec3s { 1.0f, 1.0f, 1.0f };
+
+        EventData_ECS_INSTANTIATE_GAMEOBJECT e;
+        e.game_object = gameObject;
+        EventManager::InvokeEvent(ECS_INSTANTIATE_GAMEOBJECT, &e);
+
+        return gameObject;
+    }
     void GameObject::Destory(GameObject &gameObject) {
         component_manager->EntityDestroyed(gameObject.entity);
         entity_manager->DestroyEntity(gameObject.entity);

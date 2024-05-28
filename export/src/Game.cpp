@@ -30,10 +30,27 @@ namespace CWGame {
         framebuffer = new CW::Framebuffer(CW::FramebufferType::DEFUALT, window->GetWidth(), window->GetHeight());
 
         cogwheel->GetProjectManager()->LoadProject("Unnamed Project.proj");
+
+        cogwheel->GetECS()->StartComponents();
     }
 
     void Game::Run() {
         while (cogwheel->IsRunning()) {
+            double time = window->GetTime();
+            double delta_time = time - previous_time;
+            double fps = 1 / delta_time;
+
+            static double second_timer = 0;
+            second_timer += delta_time;
+            
+            if (second_timer >= 1) {
+                second_timer = 0;
+                printf("FPS: %f\n", fps);
+            }
+
+            previous_time = time;
+
+
             cogwheel->Update();
 
             //mat4s view = GLMS_MAT4_IDENTITY_INIT;
@@ -46,7 +63,7 @@ namespace CWGame {
 
             //Shadow pass
             CW::R3D_BeginShadowPass(light_pos);
-            cogwheel->GetECS()->UpdateComponenets();
+            cogwheel->GetECS()->UpdateComponenets(false);
             CW::R3D_EndShadowPass();
 
             glViewport(0, 0, window->GetWidth(), window->GetHeight());

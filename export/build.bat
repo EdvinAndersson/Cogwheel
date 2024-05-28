@@ -22,9 +22,15 @@ cl %compile_flags% %source_files% /link %linker_flags%
 
 del *.obj
 
+pushd Assets
+for /F "delims=" %%i in ('dir /b') do (rmdir "%%i" /s/q || del "%%i" /s/q)
+popd
+
 xcopy "..\..\Editor\res\projects\Project1\Assets" Assets /s /e /i /y
 xcopy "..\..\Editor\res\projects\Project1\Unnamed Project.proj" /y
 xcopy "..\..\Editor\build\ScriptsDLL.dll" /y
 xcopy "..\..\Editor\build\assimp-vc142-mtd.dll" /y
+
+%SystemRoot%\explorer.exe %cd%
 
 popd

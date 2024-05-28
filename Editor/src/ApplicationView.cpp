@@ -79,7 +79,7 @@ namespace CWEditor {
 
             //Shadow pass
             CW::R3D_BeginShadowPass(light_pos);
-            RenderScene();
+            RenderScene(true);
             CW::R3D_EndShadowPass();
 
             //Render pass
@@ -92,7 +92,7 @@ namespace CWEditor {
 
             CW::R3D_SetPointLight(vec3s {3.0f, 0.0f, 3.0f}, vec3s {0.4f, 0.4f, 0.4f}, vec3s {1.0f, 1.0f, 1.0f}, vec3s {0.5f, 0.5f, 0.5f}, 0.1f, 0.3f, 0.4f);
             
-            RenderScene();
+            RenderScene(false);
 
             CW::R3D_RenderSkybox(skybox_texture->texture, CW::g_main_camera->view);
             
@@ -105,40 +105,42 @@ namespace CWEditor {
             
             ImGui::End();
         }
-        mat4s dev_view = GLMS_MAT4_IDENTITY_INIT;
-        dev_view = glms_translate(dev_view, dev_pos);
-        dev_view = glms_scale(dev_view, vec3s { 1.0f, -1.0f, 1.0f });
-        CW::R3D_SetViewModel(dev_view);
-        CW::R3D_SetViewPos(dev_pos);
         {
             ImGui::Begin("Dev View");
             static bool down = false;
+            static vec2s camera_rotation;
+            static vec2s prev_mouse = vec2s();
             if (ImGui::IsWindowHovered()) {
                 if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
                     if (!down) {
-                        window->WinShowCursor(false);
                         down = true;
+                        window->WinShowCursor(false);
+                        prev_mouse = vec2s { (float) window->GetMousePositionX(), (float) window->GetMousePositionY() };
                     }
                 } else {
                     if (down) {
-                        window->WinShowCursor(true);
                         down = false;
+                        window->WinShowCursor(true);
                     }
                 }
 
                 //window->WinShowCursor(!down); TODO: FIX
                 if (down) {
                     if (window->GetInputState(CW::W)) {
-                        dev_pos.z += 0.1f;
+                        dev_pos.z += 0.1f * cosf(camera_rotation.x);
+                        dev_pos.x += 0.1f * sinf(camera_rotation.x);
                     }
                     if (window->GetInputState(CW::A)) {
-                        dev_pos.x += 0.1f;
+                        dev_pos.x += 0.1f * cosf(camera_rotation.x);
+                        dev_pos.z -= 0.1f * sinf(camera_rotation.x);
                     }
                     if (window->GetInputState(CW::S)) {
-                        dev_pos.z -= 0.1f;
+                        dev_pos.z -= 0.1f * cosf(camera_rotation.x);
+                        dev_pos.x -= 0.1f * sinf(camera_rotation.x);
                     }
                     if (window->GetInputState(CW::D)) {
-                        dev_pos.x -= 0.1f;
+                        dev_pos.x -= 0.1f * cosf(camera_rotation.x);
+                        dev_pos.z += 0.1f * sinf(camera_rotation.x);
                     }
                     if (window->GetInputState(CW::SPACE)) {
                         dev_pos.y += 0.1f;
@@ -146,12 +148,24 @@ namespace CWEditor {
                     if (window->GetInputState(CW::SHIFT)) {
                         dev_pos.y -= 0.1f;
                     }
+                    camera_rotation.x += (prev_mouse.x - window->GetMousePositionX()) * dev_camera_sensitivity;
+                    camera_rotation.y += (prev_mouse.y - window->GetMousePositionY()) * dev_camera_sensitivity;
+                    prev_mouse = vec2s { (float) window->GetMousePositionX(), (float) window->GetMousePositionY() };
                 }
             }
+            mat4s dev_view = GLMS_MAT4_IDENTITY_INIT;
+            dev_view = glms_rotate(dev_view, camera_rotation.y, vec3s {1, 0, 0});
+            dev_view = glms_rotate(dev_view, camera_rotation.x, vec3s {0, -1, 0});
+
+            dev_view = glms_translate(dev_view, dev_pos);
+            dev_view = glms_scale(dev_view, vec3s { 1.0f, -1.0f, 1.0f });
+        
+            CW::R3D_SetViewModel(dev_view);
+            CW::R3D_SetViewPos(dev_pos);
 
             //Shadow pass
             CW::R3D_BeginShadowPass(light_pos);
-            RenderScene();
+            RenderScene(true);
             CW::R3D_EndShadowPass();
 
             //Render pass
@@ -162,14 +176,14 @@ namespace CWEditor {
             CW::R3D_UseDefaultShader();
             CW::R3D_GetDefaultShader().SetV3("dirLight.direction", vec3s {-light_pos.x,-light_pos.y,-light_pos.z});
 
-            static float rot = 0;
-            rot += 0.004f;
-            vec3s p = vec3s{cosf(rot)*3, 0, sinf(rot)*3};
-            CW::R3D_SetPointLight(p, vec3s {0.4f, 0.4f, 0.4f}, vec3s {1.0f, 1.0f, 1.0f}, vec3s {0.5f, 0.5f, 0.5f}, 0.1, 0.3, 0.4f);
-            CW::MaterialIndex m[8] = {CW::AssetManager::Get()->GetDefaultMaterialIndex()};
-            CW::R3D_RenderMesh(CW::AssetManager::Get()->GetDefaultMeshIndex(), m, 1, p, vec3s {0.2f, 0.2f, 0.2f}, GLMS_QUAT_IDENTITY_INIT);
+            //static float rot = 0;
+            //rot += 0.004f;
+            //vec3s p = vec3s{cosf(rot)*3, 0, sinf(rot)*3};
+            //CW::R3D_SetPointLight(p, vec3s {0.4f, 0.4f, 0.4f}, vec3s {1.0f, 1.0f, 1.0f}, vec3s {0.5f, 0.5f, 0.5f}, 0.1, 0.3, 0.4f);
+            //CW::MaterialIndex m[8] = {CW::AssetManager::Get()->GetDefaultMaterialIndex()};
+            //CW::R3D_RenderMesh(CW::AssetManager::Get()->GetDefaultMeshIndex(), m, 1, p, vec3s {0.2f, 0.2f, 0.2f}, GLMS_QUAT_IDENTITY_INIT);
             
-            RenderScene();
+            RenderScene(true);
 
             CW::R3D_RenderSkybox(skybox_texture->texture, dev_view);
             
@@ -266,10 +280,10 @@ namespace CWEditor {
         }
     }
 
-    void ApplicationView::RenderScene() {
+    void ApplicationView::RenderScene(bool shadow_pass) {
         switch (play_mode) {
             case PlayMode::RUNNING: {
-                cogwheel->GetECS()->UpdateComponenets();
+                cogwheel->GetECS()->UpdateComponenets(!shadow_pass);
             } break;
             case PlayMode::NOT_RUNNING: {
                 cogwheel->GetECS()->UpdateComponenets(false);
@@ -292,6 +306,7 @@ namespace CWEditor {
                 int height = (int) (data->width * aspect_ratio);
 
                 framebuffer_game_view->ReCreate(width, height);
+                framebuffer_dev_view->ReCreate(width, height);
                 CW::R3D_Resize(width, height);
             } break;
             case CW::EventType::PROJECT_LOAD: {
@@ -304,9 +319,12 @@ namespace CWEditor {
             } break;
             case CW::PLAY_MODE_START: {
                 play_mode = PlayMode::RUNNING;
+                cogwheel->GetECS()->StartComponents();
+                Console::Log(LogLevel::LOG_INFO, "Playing...");
             } break;
             case CW::PLAY_MODE_STOP: {
                 play_mode = PlayMode::NOT_RUNNING;
+                Console::Log(LogLevel::LOG_INFO, "Stopped Playing");
             } break;
         }
     }
@@ -462,6 +480,13 @@ namespace CWEditor {
             selected_asset.asset_index = 0;
         }
         if (ImGui::Button("Recompile Scripts")) {
+            if (play_mode == PlayMode::RUNNING) {
+                selected_game_object.entity = 0;
+                CW::EventData_PLAY_MODE_STOP e = {};
+                CW::EventManager::InvokeEvent_(CW::EventType::PLAY_MODE_STOP, &e, sizeof(CW::EventData_PLAY_MODE_STOP));
+            }
+
+            cogwheel->GetProjectManager()->SaveProject();
             cogwheel->GetECS()->LoadScripts(true);
 
             cogwheel->GetProjectManager()->ReloadProject();
@@ -674,7 +699,6 @@ namespace CWEditor {
             }
             if(ImGui::Button("New Game Object")) {
                 CW::GameObject::Instantiate();
-                Console::Log("Added a new GameObject");
                 ImGui::CloseCurrentPopup();
             }
             if (ImGui::Button("Close") || enter_pressed) {

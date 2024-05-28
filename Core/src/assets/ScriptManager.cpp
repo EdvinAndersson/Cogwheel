@@ -16,7 +16,7 @@ namespace CW {
     PFNOnDestroyGeneratedComponents _OnDestroyGeneratedComponents;
     PFNRemoveGeneratedComponent _RemoveGeneratedComponent;
 
-    HINSTANCE hDll;
+    HINSTANCE hDll = 0;
 
     void PrintErrorMessage(DWORD errorMessageID) {
         LPSTR messageBuffer = nullptr;
@@ -91,11 +91,12 @@ namespace CW {
         CW_ASSERT(_RemoveGeneratedComponent, "Unable to load function pointer!");
     }
 
-    void InitGeneratedComponentsUtility() {
+    void InitGeneratedComponentsUtility(Scene *scene) {
         DLLInitData data;
         data.component_manager = component_manager;
         data.entity_manager = entity_manager;
         data.window = CW::WinGetWindowInstance();
+        data.scene = scene;
         
         _InitGeneratedComponentsUtility(data); 
     }

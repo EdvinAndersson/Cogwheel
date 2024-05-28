@@ -6,6 +6,7 @@
 
 #include "Core/src/ecs/GameObject.h"
 #include "Core/src/Window.h"
+#include "Core/src/scene/Scene.h"
 
 namespace CW {
 
@@ -13,6 +14,7 @@ namespace CW {
         Window *window;
         ComponentManager *component_manager;
         EntityManager *entity_manager;
+        Scene *scene;
     };
 
     typedef void(*PFNInitGeneratedComponentsUtility)(DLLInitData data);
@@ -30,7 +32,7 @@ namespace CW {
     void FreeDLL();
     void LoadDLLFunctions();
 
-    void InitGeneratedComponentsUtility();
+    void InitGeneratedComponentsUtility(Scene *scene);
     void RegisterGeneratedComponents();
     void OnAwakeGeneratedComponents();
     void OnStartGeneratedComponents();

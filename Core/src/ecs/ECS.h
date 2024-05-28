@@ -25,5 +25,6 @@ namespace CW {
             void ComplieAndRegisterScripts();
         private:
             bool build_scripts_dll;
+            Scene *current_scene;
     };
 }

@@ -18,6 +18,8 @@ namespace CW {
 	public:
 		static GameObject Instantiate();
 		static GameObject Instantiate(vec3s position);
+		static GameObject GameObject::Instantiate(ComponentManager *component_manager, EntityManager *entity_manager, vec3s position);
+
 		static void Destory(GameObject &gameObject);
 		
 		bool operator<(const GameObject &rhs) const noexcept {

@@ -38,7 +38,7 @@ namespace CWEditor {
             void Init(CW::Cogwheel *cogwheel, CW::Window *window);
             void Update();
         private:
-            void RenderScene(); 
+            void RenderScene(bool shadow_pass); 
             void OnEvent(CW::Event event) override;
             void RenderDockspace();
             void RenderAssets();
@@ -78,6 +78,7 @@ namespace CWEditor {
             vec3s dev_pos = {0,0,0};
             vec3s cam_rot = {0,0,0};
             vec3s light_pos = {2.0f, 5.0f, 2.0f};
+            float dev_camera_sensitivity = 0.005f;
 
             CW::TextureData *skybox_texture;
             

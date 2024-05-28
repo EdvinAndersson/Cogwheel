@@ -22,5 +22,7 @@ namespace CWGame {
             CW::Window *window;
 
             CW::Framebuffer *framebuffer;
+
+            double previous_time = 0;
     };
 }

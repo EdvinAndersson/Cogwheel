@@ -81,11 +81,15 @@ namespace CW {
             } break;
             case EventType::PROJECT_LOAD:
             {
+                EventData_PROJECT_LOAD *e = (EventData_PROJECT_LOAD *) event.data;
+                current_scene = &e->project->scenes[0];
                 LoadScripts(true);
             } break;
         }
     }
     void ECS::LoadScripts(bool compile_scripts) {
+        printf("Load Scripts\n");
+
         component_manager->ResetComponentArrays();
         entity_manager->ResetEntities();
 
@@ -95,11 +99,12 @@ namespace CW {
         component_manager->RegisterComponent<Camera>();
 
         FreeDLL();
-        if (compile_scripts)
+        if (compile_scripts && build_scripts_dll)
             CompileScripts();
+        printf("Loaded Scripts\n");
         LoadDLLFunctions();
         
-        CW::InitGeneratedComponentsUtility();
+        CW::InitGeneratedComponentsUtility(current_scene);
         CW::RegisterGeneratedComponents();
     }
     void ECS::ComplieAndRegisterScripts() {
@@ -115,7 +120,7 @@ namespace CW {
         component_manager->RegisterComponent<Light>();
         component_manager->RegisterComponent<Camera>();
 
-        CW::InitGeneratedComponentsUtility();
+        CW::InitGeneratedComponentsUtility(current_scene);
         CW::RegisterGeneratedComponents();
     }
     void ECS::CompileScripts() {

@@ -8,7 +8,7 @@
 
 namespace CW {
 
-	#define MAX_MATERIALS 8
+	#define MAX_MATERIALS 64
 	using ModelIndex = size_t;
 
 	class Model {
